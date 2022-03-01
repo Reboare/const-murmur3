@@ -1,14 +1,19 @@
-#[test]
-fn it_works() {
-    assert_eq!(murmur3_32([], 0), 0);
-    assert_eq!(murmur3_32([], 1), 0x514E28B7);
-    assert_eq!(murmur3_32([], 0xffffffff), 0x81F16F39);
-    assert_eq!(murmur3_32([0,0,0,0], 0), 0x2362F9DE);
-    assert_eq!(murmur3_32([0x21,0x43,0x65,0x87], 0x5082EDEE), 0x2362F9DE);
-    assert_eq!(murmur3_32([0x21,0x43,0x65], 0), 0x7E4A8634);
-    assert_eq!(murmur3_32([0x21,0x43], 0), 0xA0F7B07A);
-    assert_eq!(murmur3_32([0x21], 0), 0x72661CF4);
+#[cfg(test)]
+mod tests{
+    use super::murmur3_32;
+    #[test]
+    fn standard_murmur3_32() {
+        assert_eq!(murmur3_32([], 0), 0);
+        assert_eq!(murmur3_32([], 1), 0x514E28B7);
+        assert_eq!(murmur3_32([], 0xffffffff), 0x81F16F39);
+        assert_eq!(murmur3_32([0,0,0,0], 0), 0x2362F9DE);
+        assert_eq!(murmur3_32([0x21,0x43,0x65,0x87], 0x5082EDEE), 0x2362F9DE);
+        assert_eq!(murmur3_32([0x21,0x43,0x65], 0), 0x7E4A8634);
+        assert_eq!(murmur3_32([0x21,0x43], 0), 0xA0F7B07A);
+        assert_eq!(murmur3_32([0x21], 0), 0x72661CF4);
+    }
 }
+
 
 
 pub const fn murmur3_32<const T: usize>(data: [u8; T], seed: u32) -> u32 {
