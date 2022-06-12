@@ -1,22 +1,25 @@
+#![no_std]
+
 #[cfg(test)]
 mod tests{
     use super::murmur3_32;
     #[test]
     fn standard_murmur3_32() {
-        assert_eq!(murmur3_32([], 0), 0);
-        assert_eq!(murmur3_32([], 1), 0x514E28B7);
-        assert_eq!(murmur3_32([], 0xffffffff), 0x81F16F39);
-        assert_eq!(murmur3_32([0,0,0,0], 0), 0x2362F9DE);
-        assert_eq!(murmur3_32([0x21,0x43,0x65,0x87], 0x5082EDEE), 0x2362F9DE);
-        assert_eq!(murmur3_32([0x21,0x43,0x65], 0), 0x7E4A8634);
-        assert_eq!(murmur3_32([0x21,0x43], 0), 0xA0F7B07A);
-        assert_eq!(murmur3_32([0x21], 0), 0x72661CF4);
+        assert_eq!(murmur3_32(&[], 0), 0);
+        assert_eq!(murmur3_32(&[], 1), 0x514E28B7);
+        assert_eq!(murmur3_32(&[], 0xffffffff), 0x81F16F39);
+        assert_eq!(murmur3_32(&[0,0,0,0], 0), 0x2362F9DE);
+        assert_eq!(murmur3_32(&[0x21,0x43,0x65,0x87], 0x5082EDEE), 0x2362F9DE);
+        assert_eq!(murmur3_32(&[0x21,0x43,0x65], 0), 0x7E4A8634);
+        assert_eq!(murmur3_32(&[0x21,0x43], 0), 0xA0F7B07A);
+        assert_eq!(murmur3_32(&[0x21], 0), 0x72661CF4);
     }
 }
 
-
-
-pub const fn murmur3_32<const T: usize>(data: [u8; T], seed: u32) -> u32 {
+/// A const fn implementation of the murmur32_32 algorithm
+pub const fn murmur3_32(data: &[u8], seed: u32) -> u32 {
+    let slice_size: usize = data.len();
+    
     let c1: u32 = 0xcc9e2d51;
     let c2: u32 = 0x1b873593;
     let r2 = 13;
@@ -26,7 +29,7 @@ pub const fn murmur3_32<const T: usize>(data: [u8; T], seed: u32) -> u32 {
     let mut hash = seed;
     
     let mut i = 0;
-    let iterator = T/4;
+    let iterator = slice_size/4;
     while i < iterator {
         let data = [data[i*4], data[i*4+1], data[i*4+2], data[i*4+3]];
         let mut k = u32::from_le_bytes(data);
@@ -40,7 +43,7 @@ pub const fn murmur3_32<const T: usize>(data: [u8; T], seed: u32) -> u32 {
 
         i+=1;
     }
-    match T%4 {
+    match slice_size%4 {
         0 => (),
         1 => {
             let data = [data[i*4], 0, 0, 0];
@@ -58,10 +61,10 @@ pub const fn murmur3_32<const T: usize>(data: [u8; T], seed: u32) -> u32 {
             hash = hash ^ k;
             
         }
-        _ => unimplemented!()
+        _ => unsafe{core::hint::unreachable_unchecked()}
     }
 
-    hash = hash ^ T as u32;
+    hash = hash ^ slice_size as u32;
     hash = hash ^ (hash.wrapping_shr(16));
     hash = hash.wrapping_mul(0x85ebca6b);
     hash = hash ^ (hash.wrapping_shr(13));
